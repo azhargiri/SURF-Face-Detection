@@ -1,5 +1,5 @@
 import os
-import cv
+import cv2 as cv
 import cv2
 import numpy as np
 import logging
@@ -8,7 +8,7 @@ import operator
 import parameter
 
 def get_images(path):
-    """ Returns a list of filenames for 
+    """ Returns a list of filenames for
     all images in a directory. """
     image_filenames = []
     for f in os.listdir(path):
@@ -56,8 +56,8 @@ def show_keypoints(data):
     """ paint and show images with keypoints"""
     for i in range(len(data)):
         try:
-            if data[i].facedata:                
-                for j in range(len(data[i].facedata)):                                          
+            if data[i].facedata:
+                for j in range(len(data[i].facedata)):
                     nbr_keypoints = len(data[i].facedata[j].keypoints)
                     print('%d Features found in file %s' %(nbr_keypoints, data[i].filename))
                     tmpImage = cv.CloneMat(data[i].facedata[j].face)
@@ -71,33 +71,33 @@ def show_keypoints(data):
         except:
             logging.error('Error showing keypoints - Maybe no Face in File %s (tools.py)' % data[i].filename)
 
-            
+
 def topresults(match_data):
     """ Show top matching results"""
 
     with open('match-statistics.csv', 'wb') as f:
         writer = csv.writer(f)
         writer.writerow(["Position", "Search-Image", "Train-Image",  "Matching-Value", "Nbr-Matches"])
-        
+
         for i in range(len(match_data)):
             if hasattr(match_data[i], 'matcheddata'):
                 nbr_images = len(match_data[i].matcheddata)
                 matchvalues = {}
                 if nbr_images == 0:
                     logging.warn('No MatchData available - Maybe no face in Search-File (tools.py)')
-                else:  
+                else:
                     # extract matchvalues into tmp dictionary
                     for j in range(nbr_images):
                         if not match_data[i].matcheddata[j].matchvalue:
                             logging.warn('No face found in file %s (tools.py)' % match_data[i].searchfilename)
-                        else:   
+                        else:
                             matchvalues[j] = match_data[i].matcheddata[j].matchvalue
 
-                    # sort dictionary            
+                    # sort dictionary
                     sorted_matchvalues = sorted(matchvalues.iteritems(), key=operator.itemgetter(1), reverse=True)
-              
+
                     nbr_matches = len(sorted_matchvalues)
-                    for j in range(nbr_matches):     
+                    for j in range(nbr_matches):
                         if (j+1) <= int(parameter.number_topresults): # only show given number of topresults
                             if not match_data[i].matcheddata[j].matchvalue:
                                 logging.warn('No face found in file %s (tools.py)' % match_data[i].filename)
@@ -105,7 +105,7 @@ def topresults(match_data):
                                 print('Nr. %d with MatchingValue %.5f (left %s, right %s, %d matches) (tools.py)' %((j+1), float(sorted_matchvalues[j][1]),match_data[i].matcheddata[sorted_matchvalues[j][0]].filename, match_data[i].searchfilename, match_data[i].matcheddata[sorted_matchvalues[j][0]].nbr_matches))
 
                                 #write data to file
-                                writer.writerow([j+1, match_data[i].searchfilename, match_data[i].matcheddata[sorted_matchvalues[j][0]].filename, float(sorted_matchvalues[j][1]), match_data[i].matcheddata[sorted_matchvalues[j][0]].nbr_matches])                    
+                                writer.writerow([j+1, match_data[i].searchfilename, match_data[i].matcheddata[sorted_matchvalues[j][0]].filename, float(sorted_matchvalues[j][1]), match_data[i].matcheddata[sorted_matchvalues[j][0]].nbr_matches])
 
                                 # show images
                                 if parameter.save_images == 1:
@@ -115,7 +115,7 @@ def topresults(match_data):
                             break
             else:
                 logging.warn('No Match Data for Searchfile %s available' %match_data[i].searchfilename)
-                writer.writerow(['', match_data[i].searchfilename, 'No Match-Data available'])                    
+                writer.writerow(['', match_data[i].searchfilename, 'No Match-Data available'])
 
 
 def count_features(data):
@@ -129,8 +129,8 @@ def count_features(data):
                 if hasattr(data[i], 'facedata'):
                     for j in range(len(data[i].facedata)):
                         nbr_keypoints = len(data[i].facedata[j].keypoints)
-                        nbr_descriptors = len(data[i].facedata[j].descriptors)                        
-                        writer.writerow([data[i].filename, j+1, len(data[i].facedata[j].keypoints), len(data[i].facedata[j].descriptors), data[i].facedata[j].facesize[0], data[i].facedata[j].facesize[1]])                    
+                        nbr_descriptors = len(data[i].facedata[j].descriptors)
+                        writer.writerow([data[i].filename, j+1, len(data[i].facedata[j].keypoints), len(data[i].facedata[j].descriptors), data[i].facedata[j].facesize[0], data[i].facedata[j].facesize[1]])
                 else:
                     logging.info('No facedata available in File %s (Maybe no Face found or filtered?) (tools.py)' % data[i].filename)
                     writer.writerow([data[i].filename, "no data saved"])
@@ -142,7 +142,7 @@ def enlarge_image(image, factor):
     """ Enlarge the image to the given size
     Image must be of type cv.cvmat"""
 
-    
+
     if type(image).__name__=='cvmat':
         new_image = cv.CreateMat(int(round(image.height * factor)), int(round(image.width * factor)), cv.GetElemType(image))
         cv.Resize(image, new_image)
@@ -151,14 +151,14 @@ def enlarge_image(image, factor):
         return image
     else:
         logging.error('Unkown Image Type (tools.py)')
-        
+
 
 def downsize_image(image):
     """ Resize the image to the given size
     Image must be of type cv.cvmat"""
     height_factor = float(image.height/parameter.max_facesize[0])
     width_factor = float(image.width/parameter.max_facesize[1])
-    if height_factor > width_factor:        
+    if height_factor > width_factor:
         new_face = cv.CreateMat(image.height/height_factor, image.width/height_factor, cv.GetElemType(image))
         downsize_factor = height_factor
     else:
@@ -171,41 +171,41 @@ def downsize_image(image):
 def cv2array(im):
     """ convert from type cv into type array"""
 
-    depth2dtype = { 
-        cv.IPL_DEPTH_8U: 'uint8', 
-        cv.IPL_DEPTH_8S: 'int8', 
-        cv.IPL_DEPTH_16U: 'uint16', 
-        cv.IPL_DEPTH_16S: 'int16', 
-        cv.IPL_DEPTH_32S: 'int32', 
-        cv.IPL_DEPTH_32F: 'float32', 
-        cv.IPL_DEPTH_64F: 'float64', 
-    } 
+    depth2dtype = {
+        cv.IPL_DEPTH_8U: 'uint8',
+        cv.IPL_DEPTH_8S: 'int8',
+        cv.IPL_DEPTH_16U: 'uint16',
+        cv.IPL_DEPTH_16S: 'int16',
+        cv.IPL_DEPTH_32S: 'int32',
+        cv.IPL_DEPTH_32F: 'float32',
+        cv.IPL_DEPTH_64F: 'float64',
+    }
 
-    arrdtype=im.depth 
-    a = np.fromstring( 
-        im.tostring(), 
-        dtype=depth2dtype[im.depth], 
-        count=im.width*im.height*im.nChannels) 
-    a.shape = (im.height,im.width,im.nChannels) 
-    return a 
+    arrdtype=im.depth
+    a = np.fromstring(
+        im.tostring(),
+        dtype=depth2dtype[im.depth],
+        count=im.width*im.height*im.nChannels)
+    a.shape = (im.height,im.width,im.nChannels)
+    return a
 
 def array2cv(a):
     """ convert from type array into type cv"""
-    dtype2depth = { 
-        'uint8':   cv.IPL_DEPTH_8U, 
-        'int8':    cv.IPL_DEPTH_8S, 
-        'uint16':  cv.IPL_DEPTH_16U, 
-        'int16':   cv.IPL_DEPTH_16S, 
-        'int32':   cv.IPL_DEPTH_32S, 
-        'float32': cv.IPL_DEPTH_32F, 
-        'float64': cv.IPL_DEPTH_64F, 
-    } 
-    try: 
-        nChannels = a.shape[2] 
-    except: 
-        nChannels = 1 
-    cv_im = cv.CreateImageHeader((a.shape[1],a.shape[0]), dtype2depth[str(a.dtype)], nChannels) 
-    cv.SetData(cv_im, a.tostring(),a.dtype.itemsize*nChannels*a.shape[1]) 
+    dtype2depth = {
+        'uint8':   cv.IPL_DEPTH_8U,
+        'int8':    cv.IPL_DEPTH_8S,
+        'uint16':  cv.IPL_DEPTH_16U,
+        'int16':   cv.IPL_DEPTH_16S,
+        'int32':   cv.IPL_DEPTH_32S,
+        'float32': cv.IPL_DEPTH_32F,
+        'float64': cv.IPL_DEPTH_64F,
+    }
+    try:
+        nChannels = a.shape[2]
+    except:
+        nChannels = 1
+    cv_im = cv.CreateImageHeader((a.shape[1],a.shape[0]), dtype2depth[str(a.dtype)], nChannels)
+    cv.SetData(cv_im, a.tostring(),a.dtype.itemsize*nChannels*a.shape[1])
     return cv_im
 
 
